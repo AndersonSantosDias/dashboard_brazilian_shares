@@ -15,7 +15,14 @@ const CardRank = ({title, data}) => {
       <div className="flex-grow">
         {
           data.map((item, index) => (
-            <RankItem key={index} logo={item.logourl} tiker={item.symbol} marketCap={formatMarketCap(item.marketCap)} Change={formatPercent(item.regularMarketChangePercent)}/>
+            <RankItem 
+              key={index} 
+              logo={item.logourl} 
+              tiker={item.symbol} 
+              longName={item.longName}
+              marketCap={formatMarketCap(item.marketCap)} 
+              Change={formatPercent(item.regularMarketChangePercent)}
+            />
           ))
         }
       </div>

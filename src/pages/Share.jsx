@@ -30,10 +30,7 @@ const Share = () => {
       try {
         setLoading(true);
         const interval = rangeOptions[range].interval;
-        const token = import.meta.env.VITE_BRAPI_TOKEN; // Usando variável de ambiente
-        const url = `https://brapi.dev/api/quote/${ticker}?token=${token}&range=${range}&interval=${interval}&dividends=true&modules=financialData`;
-
-        const response = await fetch(url);
+        const response = await fetch(`https://brapi.dev/api/quote/${ticker}?&range=${range}&interval=${interval}&dividends=true&modules=financialData`);
         if (!response.ok) throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
 
         const result = await response.json();
