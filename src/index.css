@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Tema claro (Padrão) */
+:root {
+  --color-bg: 241, 245, 249; /* slate-100 */
+  --color-bg-alt: 226, 232, 240; /* slate-200 */
+  --color-text: 30, 41, 59; /* slate-800 */
+  --color-primary: 79, 70, 229; /* indigo-600 */
+  --color-secondary: 14, 165, 233; /* sky-500 */
+  --color-accent: 20, 184, 166; /* teal-500 */
+}
+
+/* Tema escuro */
+.dark {
+  --color-bg: 15, 23, 42; /* slate-900 */
+  --color-bg-alt: 30, 41, 59; /* slate-800 */
+  --color-text: 226, 232, 240; /* slate-200 */
+  --color-primary: 99, 102, 241; /* indigo-500 */
+  --color-secondary: 56, 189, 248; /* sky-400 */
+  --color-accent: 45, 212, 191; /* teal-400 */
+}
