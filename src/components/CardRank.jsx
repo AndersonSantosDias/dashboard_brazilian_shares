@@ -14,9 +14,9 @@ const CardRank = ({title, data}) => {
       </div>
       <div className="flex-grow">
         {
-          data.map((item, index) => (
+          data.map((item) => (
             <RankItem 
-              key={index} 
+              key={item.symbol} 
               logo={item.logourl} 
               tiker={item.symbol} 
               longName={item.longName}
