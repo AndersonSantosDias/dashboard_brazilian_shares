@@ -1,6 +1,7 @@
 import Button from "./Button"
 import H2 from "./H2"
 import RankItem from "./RankItem"
+import { Link } from "react-router-dom"
 import { formatMarketCap, formatPercent } from "../utils/Formats"
 
 
@@ -14,15 +15,16 @@ const CardRank = ({title, data}) => {
       </div>
       <div className="flex-grow">
         {
-          data.map((item) => (
-            <RankItem 
-              key={item.symbol} 
-              logo={item.logourl} 
-              tiker={item.symbol} 
-              longName={item.longName}
-              marketCap={formatMarketCap(item.marketCap)} 
-              Change={formatPercent(item.regularMarketChangePercent)}
-            />
+          data.map((item) => ( 
+            <Link to={`/share/${item.stock}`} key={item.stock}>
+              <RankItem 
+                logo={item.logo} 
+                tiker={item.stock} 
+                longName={item.name}
+                marketCap={formatMarketCap(item.market_cap)} 
+                Change={formatPercent(item.change)}
+              />
+            </Link>
           ))
         }
       </div>

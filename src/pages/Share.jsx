@@ -8,14 +8,12 @@ import DividendChart from "../components/DividendChart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Mapeamento de range para interval. Definido fora do componente para evitar recriação a cada render.
+// Ajustado para as limitações do plano gratuito da Brapi.
 const rangeOptions = {
-  '1d': { interval: '1h', label: '1D' },
-  '7d': { interval: '1d', label: '7D' },
+  '1d': { interval: '1h', label: '1D' }, // Para o range de 1 dia, um intervalo menor como '1h' é necessário.
+  '5d': { interval: '1d', label: '5D' },
   '1mo': { interval: '1d', label: '1M' },
-  '6mo': { interval: '1wk', label: '6M' },
-  '1y': { interval: '1mo', label: '1A' },
-  '5y': { interval: '3mo', label: '5A' },
-  'max': { interval: '3mo', label: 'Máx' },
+  '3mo': { interval: '1d', label: '3M' },
 };
 
 const Share = () => {
@@ -29,8 +27,10 @@ const Share = () => {
     async function fetchShareData() {
       try {
         setLoading(true);
+        const token = import.meta.env.VITE_API_KEY;
+        console.log('Fetching data for ticker:', token);
         const interval = rangeOptions[range].interval;
-        const response = await fetch(`https://brapi.dev/api/quote/${ticker}?&range=${range}&interval=${interval}&dividends=true&modules=financialData`);
+        const response = await fetch(`https://brapi.dev/api/quote/${ticker}?range=${range}&interval=${interval}&fundamental=true&token=${token}`);
         if (!response.ok) throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
 
         const result = await response.json();

@@ -9,32 +9,15 @@ const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [stocksToSearch, setStocksToSearch] = useState([]); // Estado para armazenar os dados das 4 ações
   const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const searchContainerRef = useRef(null);
 
   const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
   };
 
-  // Efeito para buscar os dados (uma vez) e filtrar localmente
+  // Efeito para buscar ações com debouncing
   useEffect(() => {
-    const fetchInitialStocks = async () => {
-      setIsLoading(true);
-      try {
-        // A API gratuita da brapi não precisa de token para uma lista pequena de ativos
-        const response = await fetch('https://brapi.dev/api/quote/PETR4,MGLU3,VALE3,ITUB4');
-        const data = await response.json();
-        setStocksToSearch(data.results || []);
-      } catch (error) {
-        console.error("Erro ao buscar dados iniciais das ações:", error);
-        setStocksToSearch([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const search = searchValue.trim().toLowerCase();
 
     if (search === '') {
@@ -42,16 +25,25 @@ const Header = () => {
       return;
     }
 
-    // Se os dados ainda não foram carregados e o usuário começou a digitar, busca os dados.
-    if (stocksToSearch.length === 0) {
-      fetchInitialStocks();
-    }
+    // Debounce: aguarda 300ms após o usuário parar de digitar para fazer a busca
+    const debounceTimer = setTimeout(() => {
+      const fetchStocks = async () => {
+        try {
+          // A API gratuita da brapi não precisa de token para este endpoint
+          const response = await fetch(`https://brapi.dev/api/quote/list?search=${search}&type=stock&limit=7`);
+          const data = await response.json();
+          setSearchResults(data.stocks || []);
+        } catch (error) {
+          console.error("Erro ao buscar ações:", error);
+          setSearchResults([]);
+        }
+      };
+      fetchStocks();
+    }, 300);
 
-    // Filtra os dados já carregados
-    const filtered = stocksToSearch.filter(stock => stock.symbol.toLowerCase().includes(search));
-    setSearchResults(filtered);
-
-  }, [searchValue, stocksToSearch]);
+    // Limpa o timer se o usuário digitar novamente antes dos 300ms
+    return () => clearTimeout(debounceTimer);
+  }, [searchValue]);
 
   // Efeito para fechar a lista de resultados ao clicar fora
   useEffect(() => {
@@ -142,19 +134,19 @@ const SearchResultsList = ({ results, onSelect }) => (
   <div className="absolute top-full left-0 right-0 mt-2 bg-[rgb(var(--color-bg))] border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto z-20">
     {results.map((stock) => (
       <Link
-        to={`/share/${stock.symbol}`}
-        key={stock.symbol}
+        to={`/share/${stock.stock}`}
+        key={stock.stock}
         onClick={onSelect}
         className="flex items-center gap-4 p-3 hover:bg-white/10 transition-colors"
       >
         <img 
-          src={stock.logourl} 
-          alt={stock.longName} 
+          src={stock.logo} 
+          alt={stock.name} 
           className="w-8 h-8 rounded-full bg-white" // Fundo branco para logos com fundo transparente
         />
         <div>
-          <p className="font-bold">{stock.symbol}</p>
-          <p className="text-xs opacity-70">{stock.longName}</p>
+          <p className="font-bold">{stock.stock}</p>
+          <p className="text-xs opacity-70">{stock.name}</p>
         </div>
       </Link>
     ))}
