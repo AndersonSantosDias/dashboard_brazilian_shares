@@ -18,7 +18,7 @@ useEffect(() => {
     // Pega o token da API das variáveis de ambiente do Vite
     const token = import.meta.env.VITE_API_KEY;
     // Monta a URL com os parâmetros desejados. sortBy=marketCap já traz os dados ordenados.
-    const url = `https://brapi.dev/api/quote/list?search&sortBy=market_cap_basic&sortOrder=desc&limit=50&type=stock&token=${token}`;
+    const url = `https://brapi.dev/api/quote/list?search&sortBy=market_cap_basic&sortOrder=desc&type=stock&token=${token}`;
 
     try {
       const response = await fetch(url);
