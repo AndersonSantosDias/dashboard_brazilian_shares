@@ -3,7 +3,7 @@ import IndicatorCard from "./IndicatorCard";
 
 const IndicatorList = ({ financialData }) => {
   if (!financialData) {
-    return <p className="text-lg opacity-50 text-center py-4">Dados financeiros não disponíveis para este período.</p>;
+    return <p className="text-lg opacity-50 text-center py-4">Dados financeiros não disponíveis para este plano da API.</p>;
   }
 
   const indicators = [

@@ -16,7 +16,7 @@ const DividendChart = ({ dividendsData }) => {
   if (!dividendsData?.cashDividends?.length) {
     return (
       <div className="h-96 bg-[rgb(var(--color-bg-alt))] rounded-lg flex items-center justify-center">
-        <p className="text-lg opacity-50">Histórico de dividendos não disponível.</p>
+        <p className="text-lg opacity-50">Histórico de dividendos não disponível para este plano da API.</p>
       </div>
     );
   }

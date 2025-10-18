@@ -14,60 +14,54 @@ const Header = () => {
 
   const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
-  };
+  }; // pega o valor digitado no input de busca
 
-  // Efeito para buscar ações com debouncing
   useEffect(() => {
-    const search = searchValue.trim().toLowerCase();
+    const search = searchValue.trim().toLowerCase(); // remove espaços em branco e converte para minúsculas
 
     if (search === '') {
       setSearchResults([]);
-      return;
+      return;  // se o valor de busca estiver vazio, limpa os resultados. o reurn impede que o fetch seja chamado
     }
 
-    // Debounce: aguarda 300ms após o usuário parar de digitar para fazer a busca
     const debounceTimer = setTimeout(() => {
       const fetchStocks = async () => {
         try {
-          // A API gratuita da brapi não precisa de token para este endpoint
           const response = await fetch(`https://brapi.dev/api/quote/list?search=${search}&type=stock&limit=7`);
           const data = await response.json();
-          setSearchResults(data.stocks || []);
-        } catch (error) {
-          console.error("Erro ao buscar ações:", error);
-          setSearchResults([]);
+          setSearchResults(data.stocks || []); // faz a chamada pra API e atualiza os resultados da busca com os dados recebidos ou um array vazio se não houver dados
+        } catch (e) {
+          console.error(e);
+          setSearchResults([]); // em caso de erro, limpa os resultados da busca
         }
       };
       fetchStocks();
-    }, 300);
-
-    // Limpa o timer se o usuário digitar novamente antes dos 300ms
-    return () => clearTimeout(debounceTimer);
+    }, 300); // adiciona um debounce de 300ms para evitar muitas chamadas à API enquanto o usuário digita
+    return () => clearTimeout(debounceTimer); // limpa o timer do debounce quando o componente é desmontado ou quando o valor de busca muda
   }, [searchValue]);
 
-  // Efeito para fechar a lista de resultados ao clicar fora
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setSearchResults([]);
+        setSearchResults([]); // se o clique for fora do container de busca, limpa os resultados da busca
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside); // adiciona um listener para detectar cliques fora do container de busca
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside); // remove o listener quando o componente é desmontado
     };
   }, [searchContainerRef]);
 
   const handleSelectStock = () => {
     setSearchValue('');
     setSearchResults([]);
-    setIsSearchOpen(false); // Fecha a busca no mobile ao selecionar
+    setIsSearchOpen(false);
   };
 
   if (isSearchOpen) {
     return (
       <header className="fixed top-0 left-0 w-full flex justify-between items-center h-16 bg-[rgb(var(--color-bg-alt))] text-[rgb(var(--color-text))] shadow-md z-10 px-4 gap-4">
-        {/* Input para a busca mobile */}
         <div className="relative w-full" ref={searchContainerRef}>
           <Input 
             value={searchValue} 
@@ -93,13 +87,12 @@ const Header = () => {
         <Link to="/">
           <Logo />
         </Link>
-        
-        {/* Input para a busca desktop */}
+      
         <div className="hidden md:block w-1/3 relative" ref={searchContainerRef}>
           <Input 
             value={searchValue} 
             onChange={handleSearchChange} 
-            placeholder="Buscar pelo Tiker, ex: PETR4, MGLU3..."
+            placeholder="Buscar Tiker, ex: PETR4, MGLU3..."
           />
           {searchResults.length > 0 && (
             <SearchResultsList results={searchResults} onSelect={handleSelectStock} />
@@ -121,8 +114,8 @@ const Header = () => {
             onClick={toggleTheme} 
             text={
               <div className="flex items-center gap-2">
-                <span>{theme === 'light' ? '☀️' : '🌙'}</span>
-                <span className="hidden md:inline">{theme === 'light' ? 'Tema claro' : 'Tema escuro'}</span>
+                <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+                <span className="hidden md:inline">{theme === 'dark' ? 'Tema escuro' : 'Tema claro'}</span>
               </div>
             }/>
         </div>

@@ -5,39 +5,32 @@ import ShareHero from "../components/ShareHero";
 import IndicatorCard from "../components/IndicatorCard";
 import IndicatorList from "../components/IndicatorList";
 import DividendChart from "../components/DividendChart";
+import Button from "../components/Button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Mapeamento de range para interval. Definido fora do componente para evitar recriação a cada render.
-// Ajustado para as limitações do plano gratuito da Brapi.
-const rangeOptions = {
-  '1d': { interval: '1h', label: '1D' }, // Para o range de 1 dia, um intervalo menor como '1h' é necessário.
-  '5d': { interval: '1d', label: '5D' },
+
+const rangeOptions = { // Define os intervalos e rótulos para os botões de período
+  '1d': { interval: '1h', label: '1D' },
+  '5d': { interval: '1h', label: '5D' },
   '1mo': { interval: '1d', label: '1M' },
   '3mo': { interval: '1d', label: '3M' },
 };
 
 const Share = () => {
-  const { ticker } = useParams(); // Pega o ticker da URL, ex: "PETR4"
+  const { ticker } = useParams(); // Pega o ticker da URL
   const [data, setData] = useState(null);
   const [range, setRange] = useState('1mo'); // Estado para controlar o período do gráfico
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchShareData() {
+    async function fetchShareData() { // função para buscar os dados da ação na API
       try {
         setLoading(true);
         const token = import.meta.env.VITE_API_KEY;
-        console.log('Fetching data for ticker:', token);
         const interval = rangeOptions[range].interval;
         const response = await fetch(`https://brapi.dev/api/quote/${ticker}?range=${range}&interval=${interval}&fundamental=true&token=${token}`);
-        if (!response.ok) throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
-
         const result = await response.json();
-        // Verifica se há resultados e se o primeiro resultado é um objeto válido
-        if (!result.results || result.results.length === 0 || !result.results[0]) {
-          throw new Error('Ativo não encontrado ou dados indisponíveis.');
-        }
         setData(result.results[0]);
       } catch (e) {
         setError(e.message);
@@ -46,36 +39,34 @@ const Share = () => {
       }
     }
     fetchShareData();
-  }, [ticker, range]); // Agora as dependências estão corretas e completas.
+  }, [ticker, range]); // pega os dados da api sempre que o ticker ou o range mudar, para exibir o gráfico correto
 
-  // Função para formatar a data do gráfico dinamicamente
-  const formatDate = (timestamp) => {
+
+  const formatDate = (timestamp) => { // Formata a data com base no intervalo selecionado
     const date = new Date(timestamp * 1000);
     switch (range) {
       case '1d':
         return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       case '5d':
+        return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
       case '1mo':
         return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      case '6mo':
-      case '1y':
-        return date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-      default: // 5y, max
-        return date.toLocaleDateString('pt-BR', { year: 'numeric' });
+      case '3mo':
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      default: 
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     }
   };
 
-  // Prepara os dados para o gráfico, formatando a data
   const chartData = data?.historicalDataPrice?.map(item => ({
     date: formatDate(item.date),
-    Preço: parseFloat(item.close.toFixed(2)), // Garante que é um número
+    Preço: parseFloat(item.close.toFixed(2)),
   }));
 
   return (
     <>
       <Header />
       <div className="bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
-        {/* Hero Section */}
         {loading && <div className="h-56 pt-16 w-full bg-[rgb(var(--color-bg-alt))] animate-pulse" />}
         {error && <p className="pt-24 text-center text-red-500">Erro ao carregar dados do ativo.</p>}
         {data && <ShareHero logo={data.logourl} longName={data.longName} symbol={data.symbol} />}
@@ -92,18 +83,17 @@ const Share = () => {
                   <IndicatorCard title="P/L" value={data.priceEarnings?.toFixed(2) || data.trailingPE?.toFixed(2) || 'N/A'} />
                 </div>
 
-                {/* Navegação de Período do Gráfico */}
+                
                 <div className="flex space-x-2 mb-4">
-                  {Object.keys(rangeOptions).map((key) => (
-                    <button
+                  {Object.keys(rangeOptions).map((key) => ( // Gera os botões de período dinamicamente
+                    <Button
                       key={key}
                       onClick={() => setRange(key)}
                       className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
                         range === key ? 'bg-indigo-600 text-white' : 'bg-[rgb(var(--color-bg-alt))] hover:bg-indigo-500/20'
                       }`}
-                    >
-                      {rangeOptions[key].label}
-                    </button>
+                      text={rangeOptions[key].label}
+                    />
                   ))}
                 </div>
 
@@ -131,7 +121,7 @@ const Share = () => {
                 )}
               </section>
 
-              {/* Seção de Indicadores */}
+              
               <section id="indicadores" className="pt-12">
                 <h2 className="text-2xl font-bold mb-4">Principais Indicadores</h2>
                 <IndicatorList financialData={data.financialData} />
